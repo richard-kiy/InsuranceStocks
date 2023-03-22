@@ -1,0 +1,11 @@
+{
+    "https://connect.convexin.com/": {
+        "server_url": "https://connect.convexin.com/",
+        "filename": "/Users/richard.kiy/Documents/Projects/InsuranceStocks",
+        "app_url": "https://connect.convexin.com/InsuranceFinanceDetails/",
+        "app_id": "187dbeea-cd05-419b-b7cc-a1bb1a9d3539",
+        "app_guid": "187dbeea-cd05-419b-b7cc-a1bb1a9d3539",
+        "title": "InsuranceStocks",
+        "app_mode": "python-dash"
+    }
+}
