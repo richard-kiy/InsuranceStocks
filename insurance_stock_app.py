@@ -9,6 +9,7 @@ from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 
 import dash_mantine_components as dmc
+import dash_trich_components as dtc
 
 # import dash_daq as daq
 from millify import millify
@@ -21,7 +22,12 @@ from dash_extensions.enrich import Dash, Input, Output, State
 # # Connect to main app.py file
 from app import app, server
 
-pd.set_option("display.max_columns", None)
+# pd.set_option("display.max_columns", None)
+
+
+def get_icon(icon):
+    return DashIconify(icon=icon, height=16)
+
 
 symbols = [
     "AXS",
@@ -44,13 +50,54 @@ symbols = [
     "HIG",
     "TRV",
     "WRB",
-    "CS",
+    # "CS",
     "JRVR",
     "SPNT",
 ]
 tickers = Ticker(symbols)
 data = tickers.price
 df = pd.json_normalize(data)
+
+print(df.head())
+
+carousel = (
+    # dtc.Carousel(
+    #     [
+    #         html.Div(
+    #             [
+    #                 # This span shows the name of the stock.
+    #                 html.Span(stock, style={"margin-right": "10px"}),
+    #                 # This other one shows its variation.
+    #                 html.Span(
+    #                     "{}{:.2%}".format(
+    #                         "+"
+    #                         if round(
+    #                             df["{}.regularMarketChange".format(stock)].iloc[0], 2
+    #                         )
+    #                         > 0
+    #                         else "",
+    #                         round(
+    #                             df["{}.regularMarketChange".format(stock)].iloc[0], 2
+    #                         ),
+    #                     ),
+    #                     style={
+    #                         "color": "green"
+    #                         if round(
+    #                             df["{}.regularMarketChange".format(stock)].iloc[0], 2
+    #                         )
+    #                         > 0
+    #                         else "red"
+    #                     },
+    #                 ),
+    #             ]
+    #         )
+    #         for stock in symbols
+    #     ],
+    #     id="main-carousel",
+    #     autoplay=True,
+    #     slides_to_show=6,
+    # ),
+)
 
 company_list = []
 for ticker in symbols:
@@ -75,7 +122,7 @@ all_company_fig.update_layout(
     xaxis_title="Date",
     yaxis_title="Price",
     # plot_bgcolor= 'rgba(0, 0, 0, 0)',
-    paper_bgcolor= 'rgba(0, 0, 0, 0)',
+    paper_bgcolor="rgba(0, 0, 0, 0)",
 )
 all_company_fig.update_xaxes(dtick="M1", tickformat="%b\n%Y")
 
@@ -117,7 +164,6 @@ def populate_from_ticker(ticker):
     price_change = f"{arrow}{currency_symbol}{price_change}"
     percent_change = f"{arrow}{percent_change}%"
     stock_name = f"{stock_name} ({symbol})"
-
 
     # Summary Profile #
     data_summary = stock_specific_ticker.summary_profile
@@ -175,11 +221,11 @@ def populate_from_ticker(ticker):
             dmc.Text(f"Total Revenue: {currency_symbol}{total_revenue}"),
         ]
     )
-    
+
     # #### Balance Sheet ####
     # data_balance_sheet = stock_specific_ticker.balance_sheet()
     # print(data_balance_sheet.head())
-    
+
     # ### All Financial Data ###
     # all_financial_data = stock_specific_ticker.all_financial_data('a')
     # print(all_financial_data.head())
@@ -196,7 +242,7 @@ def populate_from_ticker(ticker):
         font_family="convexFontLight",
         xaxis_title="Date",
         yaxis_title=f"Price ({currency_symbol})",
-        paper_bgcolor= 'rgba(0, 0, 0, 0)',
+        paper_bgcolor="rgba(0, 0, 0, 0)",
     )
 
     return (
@@ -275,65 +321,218 @@ app.layout = dmc.MantineProvider(
         },
         id="mantine_theme",
         children=[
+            dtc.Carousel(
+                [
+                    html.Div(
+                        [
+                            html.Span(
+                                "{}".format(
+                                    "⬆"
+                                    if round(
+                                        df[
+                                            "{}.regularMarketChangePercent".format(
+                                                stock
+                                            )
+                                        ].iloc[0]
+                                        * 100,
+                                        2,
+                                    )
+                                    > 0
+                                    else "⬇",
+                                ),
+                                style={
+                                    "color": "green"
+                                    if round(
+                                        df["{}.regularMarketChange".format(stock)].iloc[
+                                            0
+                                        ],
+                                        2,
+                                    )
+                                    > 0
+                                    else "red"
+                                },
+                            ),
+                            # This span shows the name of the stock.
+                            html.Span(
+                                "{}".format(
+                                    stock,
+                                ),
+                                style={"margin-right": "10px"},
+                            ),
+                            # This other one shows its variation.
+                            html.Span(
+                                "{}{}%".format(
+                                    "+"
+                                    if round(
+                                        df[
+                                            "{}.regularMarketChangePercent".format(
+                                                stock
+                                            )
+                                        ].iloc[0]
+                                        * 100,
+                                        2,
+                                    )
+                                    > 0
+                                    else "",
+                                    round(
+                                        df[
+                                            "{}.regularMarketChangePercent".format(
+                                                stock
+                                            )
+                                        ].iloc[0]
+                                        * 100,
+                                        2,
+                                    ),
+                                ),
+                                style={
+                                    "color": "green"
+                                    if round(
+                                        df["{}.regularMarketChange".format(stock)].iloc[
+                                            0
+                                        ],
+                                        2,
+                                    )
+                                    > 0
+                                    else "red"
+                                },
+                            ),
+                        ]
+                    )
+                    for stock in symbols
+                ],
+                id="main-carousel",
+                autoplay=True,
+                slides_to_show=7,
+                arrows=False,
+                # center_mode=True,
+            ),
+            dmc.Drawer(
+                title=html.Img(
+                    src=app.get_asset_url("convexLogo.svg"),
+                    style={
+                        "width": "100%",
+                        # "height": "auto",
+                        # "padding-right": "50px",
+                    },
+                ),
+                id="sidebar",
+                # withCloseButton=False,
+                # padding="md",
+                size="240px",
+                zIndex=10000,
+                children=[
+                    html.Div(
+                        [
+                            dmc.NavLink(
+                                label="Home",
+                                icon=get_icon(icon="bi:house-door-fill"),
+                                rightSection=get_icon(icon="tabler-chevron-right"),
+                                active=True,
+                                variant="filled",
+                            ),
+                            dmc.NavLink(
+                                label="Company Details",
+                                icon=get_icon(icon="bi:house-door-fill"),
+                                rightSection=get_icon(icon="tabler-chevron-right"),
+                                # active=True,
+                                variant="filled",
+                            ),
+                            dmc.NavLink(
+                                label="Test",
+                                icon=get_icon(icon="bi:house-door-fill"),
+                                rightSection=get_icon(icon="tabler-chevron-right"),
+                                # active=True,
+                                variant="filled",
+                            ),
+                            dmc.NavLink(
+                                label="More Stuff",
+                                icon=get_icon(icon="bi:house-door-fill"),
+                                rightSection=get_icon(icon="tabler-chevron-right"),
+                                # active=True,
+                                variant="filled",
+                            ),
+                        ],
+                        style={"width": 240},
+                    ),
+                ],
+            ),
             dcc.Location(id="url", refresh=False),
             dmc.Button(id="theme-changed", style={"display": "none"}),
             dmc.Button(id="initial-theme-check", style={"display": "none"}),
             dcc.Store(id="theme-store", storage_type="local"),
             dmc.Header(
-                style={"overflow-x": "auto", "overflow-y": "hidden", "padding": "5px"},
-                height=70,
+                style={"overflow-x": "auto", "overflow-y": "hidden", "padding": "0px"},
+                height=75,
                 p="md",
                 children=[
                     dmc.Container(
                         style={"min-width": "max-content"},
                         fluid=True,
-                        children=dmc.Group(
-                            position="apart",
-                            # position="flex-start",
-                            # align="baseline",
-                            children=[
-                                dmc.Title(
-                                    "Insurance Finance Details",
-                                    style={"font-family": "convexFont"},
-                                ),
-                                dmc.Group(
-                                    align="right",
-                                    style={"align-items": "center"},
-                                    position="center",
-                                    spacing="xl",
-                                    # style={"padding-top": "30px"},
-                                    children=[
-                                        dmc.Select(
-                                            id="stock_search",
-                                            data=company_list,
-                                            value="AXS",
-                                            label="Search Company / Symbol",
-                                            searchable=True,
-                                            clearable=True,
-                                            style={"width": 500},
-                                            icon=DashIconify(
-                                                icon="radix-icons:magnifying-glass"
-                                            ),
-                                            # rightSection=DashIconify(
-                                            #     icon="radix-icons:chevron-down"
-                                            # ),
-                                        ),
-                                        dmc.Tooltip(
+                        children=[
+                            dmc.Group(
+                                position="apart",
+                                # position="flex-start",
+                                # align="baseline",
+                                children=[
+                                    dmc.Group(
+                                        [
                                             dmc.ActionIcon(
-                                                id="color-scheme-toggle",
-                                                radius=30,
-                                                size=36,
-                                                variant="outline",
-                                                style={"align-items": "center"}
-                                                # color="gray",
+                                                id="sidebar_button",
+                                                # className="menu_button",
+                                                variant="transparent",
+                                                size="xl",
+                                                children=[
+                                                    DashIconify(
+                                                        icon="majesticons:menu",
+                                                        className="menu_button_icon",
+                                                    )
+                                                ],
                                             ),
-                                            label="Dark/Light Theme",
-                                            position="bottom",                                            
-                                        ),
-                                    ],
-                                ),
-                            ],
-                        ),
+                                            dmc.Title(
+                                                "Insurance Finance Details",
+                                                style={"font-family": "convexFont"},
+                                            ),
+                                        ]
+                                    ),
+                                    dmc.Group(
+                                        align="right",
+                                        style={"align-items": "center"},
+                                        position="center",
+                                        spacing="xl",
+                                        # style={"padding-top": "30px"},
+                                        children=[
+                                            dmc.Select(
+                                                id="stock_search",
+                                                data=company_list,
+                                                value="AXS",
+                                                label="Search Company / Symbol",
+                                                searchable=True,
+                                                clearable=True,
+                                                style={"width": 500},
+                                                icon=DashIconify(
+                                                    icon="radix-icons:magnifying-glass"
+                                                ),
+                                                # rightSection=DashIconify(
+                                                #     icon="radix-icons:chevron-down"
+                                                # ),
+                                            ),
+                                            dmc.Tooltip(
+                                                dmc.ActionIcon(
+                                                    id="color-scheme-toggle",
+                                                    radius=30,
+                                                    size=36,
+                                                    variant="outline",
+                                                    style={"align-items": "center"}
+                                                    # color="gray",
+                                                ),
+                                                label="Dark/Light Theme",
+                                                position="bottom",
+                                            ),
+                                        ],
+                                    ),
+                                ],
+                            ),
+                        ],
                     )
                 ],
             ),
@@ -465,6 +664,15 @@ def theme_store_check(n, data):
             raise PreventUpdate
     else:
         return "light", n
+
+
+@app.callback(
+    Output("sidebar", "opened"),
+    Input("sidebar_button", "n_clicks"),
+    prevent_initial_call=True,
+)
+def drawer_demo(n_clicks):
+    return True
 
 
 @app.callback(

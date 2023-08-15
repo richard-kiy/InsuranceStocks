@@ -21,6 +21,12 @@
 *, html, body {
 font-family: convexFont;
 }
+.slick-prev{
+  display:none !important
+}
+.slick-next{
+  display:none !important
+}
 
 :root {
   --blue: #007bff;
