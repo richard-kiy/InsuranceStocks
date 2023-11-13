@@ -145,14 +145,14 @@ def populate_from_ticker(ticker):
     # Price Profile #
     price_data = stock_specific_ticker.price
     price_df = pd.json_normalize(price_data)
-    symbol = price_df["{}.symbol".format(ticker)].iloc[0]
-    stock_name = price_df["{}.longName".format(ticker)].iloc[0]
-    price = price_df["{}.regularMarketPrice".format(ticker)].iloc[0]
-    price_change = round(price_df["{}.regularMarketChange".format(ticker)].iloc[0], 2)
+    symbol = price_df[f"{ticker}.symbol"].iloc[0]
+    stock_name = price_df[f"{ticker}.longName"].iloc[0]
+    price = price_df[f"{ticker}.regularMarketPrice"].iloc[0]
+    price_change = round(price_df[f"{ticker}.regularMarketChange"].iloc[0], 2)
     percent_change = round(
-        (price_df["{}.regularMarketChangePercent".format(ticker)].iloc[0] * 100), 2
+        price_df[f"{ticker}.regularMarketChangePercent"].iloc[0] * 100, 2
     )
-    currency_symbol = price_df["{}.currencySymbol".format(ticker)].iloc[0]
+    currency_symbol = price_df[f"{ticker}.currencySymbol"].iloc[0]
     if float(price_change) > 0:
         price_change_colour = {"color": "green"}
         arrow = "⬆"
@@ -169,18 +169,18 @@ def populate_from_ticker(ticker):
     data_summary = stock_specific_ticker.summary_profile
     df_summary = pd.json_normalize(data_summary)
 
-    address_line_1 = df_summary["{}.address1".format(ticker)].iloc[0]
-    sector = df_summary["{}.sector".format(ticker)].iloc[0]
-    industry = df_summary["{}.industry".format(ticker)].iloc[0]
-    city = df_summary["{}.city".format(ticker)].iloc[0]
+    address_line_1 = df_summary[f"{ticker}.address1"].iloc[0]
+    sector = df_summary[f"{ticker}.sector"].iloc[0]
+    industry = df_summary[f"{ticker}.industry"].iloc[0]
+    city = df_summary[f"{ticker}.city"].iloc[0]
     # if f'{ticker}.state' in df_summary:
     #         state = df_summary["{}.state".format(ticker)].iloc[0]
     # else:
     #     state = None
-    zip = df_summary["{}.zip".format(ticker)].iloc[0]
-    country = df_summary["{}.country".format(ticker)].iloc[0]
+    zip = df_summary[f"{ticker}.zip"].iloc[0]
+    country = df_summary[f"{ticker}.country"].iloc[0]
     # phone = df_summary["{}.phone".format(ticker)].iloc[0]
-    website = df_summary["{}.website".format(ticker)].iloc[0]
+    website = df_summary[f"{ticker}.website"].iloc[0]
     address_div = html.Div(
         [
             dmc.Text("Company Profile", weight=700, underline=True, size="lg"),
@@ -630,20 +630,12 @@ def change_image(n, value):
             width=22,
         )
     ]
-    if n:
-        if value == "dark":
-            all_company_fig.update_layout(font_color="black")
-            return light_icon, "gray", all_company_fig
-        else:
-            all_company_fig.update_layout(font_color="white")
-            return dark_icon, "yellow", all_company_fig
+    if n and value == "dark" or not n and value == "light":
+        all_company_fig.update_layout(font_color="black")
+        return light_icon, "gray", all_company_fig
     else:
-        if value == "light":
-            all_company_fig.update_layout(font_color="black")
-            return light_icon, "gray", all_company_fig
-        else:
-            all_company_fig.update_layout(font_color="white")
-            return dark_icon, "yellow", all_company_fig
+        all_company_fig.update_layout(font_color="white")
+        return dark_icon, "yellow", all_company_fig
 
 
 @app.callback(
@@ -653,17 +645,13 @@ def change_image(n, value):
     State("theme-store", "data"),
 )
 def theme_store_check(n, data):
-    if data:
-        if n:
-            if data == "dark":
-                data = "light"
-            else:
-                data = "dark"
-            return data, n
-        else:
-            raise PreventUpdate
-    else:
+    if not data:
         return "light", n
+    if n:
+        data = "light" if data == "dark" else "dark"
+        return data, n
+    else:
+        raise PreventUpdate
 
 
 @app.callback(
@@ -680,10 +668,7 @@ def drawer_demo(n_clicks):
     Input("theme-store", "data"),
 )
 def theme(data):
-    if data:
-        return {"colorScheme": data}
-    else:
-        return {"colorScheme": "light"}
+    return {"colorScheme": data} if data else {"colorScheme": "light"}
 
 
 if __name__ == "__main__":
